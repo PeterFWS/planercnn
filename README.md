@@ -11,7 +11,9 @@ For GPU 2080t, use sm_70 instead of sm_75.
 
 Modification:
 
-- Uploaded conda env yml file.
+- Uploaded conda env yml file for my docker.
+- Uploaded .gitignore.
+- Updated README.md
 
 # Log before fork
 
