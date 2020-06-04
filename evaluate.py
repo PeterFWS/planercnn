@@ -425,149 +425,165 @@ class TraditionalDetector():
         return detection_pair
 
 
+# args see option.py
 def evaluate(options):
     config = InferenceConfig(options)
     config.FITTING_TYPE = options.numAnchorPlanes
 
-    if options.dataset == '':
-        dataset = PlaneDataset(options, config, split='test',
-                               random=False, load_semantics=False)
-    elif options.dataset == 'occlusion':
-        config_dataset = copy.deepcopy(config)
-        config_dataset.OCCLUSION = False
-        dataset = PlaneDataset(options, config_dataset,
-                               split='test', random=False, load_semantics=True)
-    elif 'nyu' in options.dataset:
-        dataset = NYUDataset(options, config, split='val', random=False)
-    elif options.dataset == 'synthia':
-        dataset = SynthiaDataset(options, config, split='val', random=False)
-    elif options.dataset == 'kitti':
-        camera = np.zeros(6)
-        camera[0] = 9.842439e+02
-        camera[1] = 9.808141e+02
-        camera[2] = 6.900000e+02
-        camera[3] = 2.331966e+02
-        camera[4] = 1242
-        camera[5] = 375
-        dataset = InferenceDataset(options, config, image_list=glob.glob(
-            '../../Data/KITTI/scene_3/*.png'), camera=camera)
-    elif options.dataset == '7scene':
-        camera = np.zeros(6)
-        camera[0] = 519
-        camera[1] = 519
-        camera[2] = 320
-        camera[3] = 240
-        camera[4] = 640
-        camera[5] = 480
-        dataset = InferenceDataset(options, config, image_list=glob.glob(
-            '../../Data/SevenScene/scene_3/*.png'), camera=camera)
-    elif options.dataset == 'tanktemple':
-        camera = np.zeros(6)
-        camera[0] = 0.7
-        camera[1] = 0.7
-        camera[2] = 0.5
-        camera[3] = 0.5
-        camera[4] = 1
-        camera[5] = 1
-        dataset = InferenceDataset(options, config, image_list=glob.glob(
-            '../../Data/TankAndTemple/scene_4/*.jpg'), camera=camera)
-    elif options.dataset == 'make3d':
-        camera = np.zeros(6)
-        camera[0] = 0.7
-        camera[1] = 0.7
-        camera[2] = 0.5
-        camera[3] = 0.5
-        camera[4] = 1
-        camera[5] = 1
-        dataset = InferenceDataset(options, config, image_list=glob.glob(
-            '../../Data/Make3D/*.jpg'), camera=camera)
-    elif options.dataset == 'popup':
-        camera = np.zeros(6)
-        camera[0] = 0.7
-        camera[1] = 0.7
-        camera[2] = 0.5
-        camera[3] = 0.5
-        camera[4] = 1
-        camera[5] = 1
-        dataset = InferenceDataset(options, config, image_list=glob.glob(
-            '../../Data/PhotoPopup/*.jpg'), camera=camera)
-    elif options.dataset == 'cross' or options.dataset == 'cross_2':
-        image_list = ['test/cross_dataset/' +
-                      str(c) + '_image.png' for c in range(12)]
-        cameras = []
-        camera = np.zeros(6)
-        camera[0] = 587
-        camera[1] = 587
-        camera[2] = 320
-        camera[3] = 240
-        camera[4] = 640
-        camera[5] = 480
-        for c in range(4):
-            cameras.append(camera)
-            continue
-        camera_kitti = np.zeros(6)
-        camera_kitti[0] = 9.842439e+02
-        camera_kitti[1] = 9.808141e+02
-        camera_kitti[2] = 6.900000e+02
-        camera_kitti[3] = 2.331966e+02
-        camera_kitti[4] = 1242.0
-        camera_kitti[5] = 375.0
-        for c in range(2):
-            cameras.append(camera_kitti)
-            continue
-        camera_synthia = np.zeros(6)
-        camera_synthia[0] = 133.185088
-        camera_synthia[1] = 134.587036
-        camera_synthia[2] = 160.000000
-        camera_synthia[3] = 96.000000
-        camera_synthia[4] = 320
-        camera_synthia[5] = 192
-        for c in range(2):
-            cameras.append(camera_synthia)
-            continue
-        camera_tanktemple = np.zeros(6)
-        camera_tanktemple[0] = 0.7
-        camera_tanktemple[1] = 0.7
-        camera_tanktemple[2] = 0.5
-        camera_tanktemple[3] = 0.5
-        camera_tanktemple[4] = 1
-        camera_tanktemple[5] = 1
-        for c in range(2):
-            cameras.append(camera_tanktemple)
-            continue
-        for c in range(2):
-            cameras.append(camera)
-            continue
-        dataset = InferenceDataset(
-            options, config, image_list=image_list, camera=cameras)
-    elif options.dataset == 'selected':
-        image_list = glob.glob('test/selected_images/*_image_0.png')
-        image_list = [filename for filename in image_list if '63_image' not in filename and '77_image' not in filename] + \
-            [filename for filename in image_list if '63_image' in filename or '77_image' in filename]
-        camera = np.zeros(6)
-        camera[0] = 587
-        camera[1] = 587
-        camera[2] = 320
-        camera[3] = 240
-        camera[4] = 640
-        camera[5] = 480
-        dataset = InferenceDataset(
-            options, config, image_list=image_list, camera=camera)
-    elif options.dataset == 'comparison':
-        image_list = ['test/comparison/' +
-                      str(index) + '_image_0.png' for index in [65, 11, 24]]
-        camera = np.zeros(6)
-        camera[0] = 587
-        camera[1] = 587
-        camera[2] = 320
-        camera[3] = 240
-        camera[4] = 640
-        camera[5] = 480
-        dataset = InferenceDataset(
-            options, config, image_list=image_list, camera=camera)
-    elif 'inference' in options.dataset:
+    # if options.dataset == '':
+    #     dataset = PlaneDataset(options, config, split='test',
+    #                            random=False, load_semantics=False)
+    # elif options.dataset == 'occlusion':
+    #     config_dataset = copy.deepcopy(config)
+    #     config_dataset.OCCLUSION = False
+    #     dataset = PlaneDataset(options, config_dataset,
+    #                            split='test', random=False, load_semantics=True)
+    # elif 'nyu' in options.dataset:
+    #     dataset = NYUDataset(options, config, split='val', random=False)
+    # elif options.dataset == 'synthia':
+    #     dataset = SynthiaDataset(options, config, split='val', random=False)
+    # elif options.dataset == 'kitti':
+    #     camera = np.zeros(6)
+    #     camera[0] = 9.842439e+02
+    #     camera[1] = 9.808141e+02
+    #     camera[2] = 6.900000e+02
+    #     camera[3] = 2.331966e+02
+    #     camera[4] = 1242
+    #     camera[5] = 375
+    #     dataset = InferenceDataset(options, config, image_list=glob.glob(
+    #         '../../Data/KITTI/scene_3/*.png'), camera=camera)
+    # elif options.dataset == '7scene':
+    #     camera = np.zeros(6)
+    #     camera[0] = 519
+    #     camera[1] = 519
+    #     camera[2] = 320
+    #     camera[3] = 240
+    #     camera[4] = 640
+    #     camera[5] = 480
+    #     dataset = InferenceDataset(options, config, image_list=glob.glob(
+    #         '../../Data/SevenScene/scene_3/*.png'), camera=camera)
+    # elif options.dataset == 'tanktemple':
+    #     camera = np.zeros(6)
+    #     camera[0] = 0.7
+    #     camera[1] = 0.7
+    #     camera[2] = 0.5
+    #     camera[3] = 0.5
+    #     camera[4] = 1
+    #     camera[5] = 1
+    #     dataset = InferenceDataset(options, config, image_list=glob.glob(
+    #         '../../Data/TankAndTemple/scene_4/*.jpg'), camera=camera)
+    # elif options.dataset == 'make3d':
+    #     camera = np.zeros(6)
+    #     camera[0] = 0.7
+    #     camera[1] = 0.7
+    #     camera[2] = 0.5
+    #     camera[3] = 0.5
+    #     camera[4] = 1
+    #     camera[5] = 1
+    #     dataset = InferenceDataset(options, config, image_list=glob.glob(
+    #         '../../Data/Make3D/*.jpg'), camera=camera)
+    # elif options.dataset == 'popup':
+    #     camera = np.zeros(6)
+    #     camera[0] = 0.7
+    #     camera[1] = 0.7
+    #     camera[2] = 0.5
+    #     camera[3] = 0.5
+    #     camera[4] = 1
+    #     camera[5] = 1
+    #     dataset = InferenceDataset(options, config, image_list=glob.glob(
+    #         '../../Data/PhotoPopup/*.jpg'), camera=camera)
+    # elif options.dataset == 'cross' or options.dataset == 'cross_2':
+    #     image_list = ['test/cross_dataset/' +
+    #                   str(c) + '_image.png' for c in range(12)]
+    #     cameras = []
+    #     camera = np.zeros(6)
+    #     camera[0] = 587
+    #     camera[1] = 587
+    #     camera[2] = 320
+    #     camera[3] = 240
+    #     camera[4] = 640
+    #     camera[5] = 480
+    #     for c in range(4):
+    #         cameras.append(camera)
+    #         continue
+    #     camera_kitti = np.zeros(6)
+    #     camera_kitti[0] = 9.842439e+02
+    #     camera_kitti[1] = 9.808141e+02
+    #     camera_kitti[2] = 6.900000e+02
+    #     camera_kitti[3] = 2.331966e+02
+    #     camera_kitti[4] = 1242.0
+    #     camera_kitti[5] = 375.0
+    #     for c in range(2):
+    #         cameras.append(camera_kitti)
+    #         continue
+    #     camera_synthia = np.zeros(6)
+    #     camera_synthia[0] = 133.185088
+    #     camera_synthia[1] = 134.587036
+    #     camera_synthia[2] = 160.000000
+    #     camera_synthia[3] = 96.000000
+    #     camera_synthia[4] = 320
+    #     camera_synthia[5] = 192
+    #     for c in range(2):
+    #         cameras.append(camera_synthia)
+    #         continue
+    #     camera_tanktemple = np.zeros(6)
+    #     camera_tanktemple[0] = 0.7
+    #     camera_tanktemple[1] = 0.7
+    #     camera_tanktemple[2] = 0.5
+    #     camera_tanktemple[3] = 0.5
+    #     camera_tanktemple[4] = 1
+    #     camera_tanktemple[5] = 1
+    #     for c in range(2):
+    #         cameras.append(camera_tanktemple)
+    #         continue
+    #     for c in range(2):
+    #         cameras.append(camera)
+    #         continue
+    #     dataset = InferenceDataset(
+    #         options, config, image_list=image_list, camera=cameras)
+    # elif options.dataset == 'selected':
+    #     image_list = glob.glob('test/selected_images/*_image_0.png')
+    #     image_list = [filename for filename in image_list if '63_image' not in filename and '77_image' not in filename] + \
+    #         [filename for filename in image_list if '63_image' in filename or '77_image' in filename]
+    #     camera = np.zeros(6)
+    #     camera[0] = 587
+    #     camera[1] = 587
+    #     camera[2] = 320
+    #     camera[3] = 240
+    #     camera[4] = 640
+    #     camera[5] = 480
+    #     dataset = InferenceDataset(
+    #         options, config, image_list=image_list, camera=camera)
+    # elif options.dataset == 'comparison':
+    #     image_list = ['test/comparison/' +
+    #                   str(index) + '_image_0.png' for index in [65, 11, 24]]
+    #     camera = np.zeros(6)
+    #     camera[0] = 587
+    #     camera[1] = 587
+    #     camera[2] = 320
+    #     camera[3] = 240
+    #     camera[4] = 640
+    #     camera[5] = 480
+    #     dataset = InferenceDataset(
+    #         options, config, image_list=image_list, camera=camera)
+
+    # Prediction/ Inference
+    # elif 'inference' in options.dataset:
+    if 'inference' in options.dataset:
         image_list = glob.glob(options.customDataFolder + '/*.png') + \
             glob.glob(options.customDataFolder + '/*.jpg')
+
+        # For SLAM application, we need to sort the image in order:
+        image_list = sorted(
+            image_list, key=lambda x: int(x.split("/")[-1].split(".")[0]))
+
+        # Print sorted image name in log file to check
+        # with open("./log_sorted.txt", "w") as fp:
+        #     for i in range(len(image_list)):
+        #         fp.write(str(image_list[i].split("/")
+        #                      [-1].split(".")[0]) + "\n")
+
+        # Read camera params
         if os.path.exists(options.customDataFolder + '/camera.txt'):
             camera = np.zeros(6)
             with open(options.customDataFolder + '/camera.txt', 'r') as f:
@@ -579,6 +595,7 @@ def evaluate(options):
                         continue
                     break
                 pass
+
         else:
             camera = [filename.replace('.png', '.txt').replace(
                 '.jpg', '.txt') for filename in image_list]
@@ -638,6 +655,7 @@ def evaluate(options):
                 options.suffix = specified_suffix if specified_suffix != '' else ''
                 detectors.append(('refine_single', PlaneRCNNDetector(
                     options, config, modelType='refine_single')))
+            # Use the final model in the checkpoint/
             elif method == 'f':
                 options.suffix = specified_suffix if specified_suffix != '' else ''
                 detectors.append(('final', PlaneRCNNDetector(
@@ -658,6 +676,7 @@ def evaluate(options):
         for sampleIndex, sample in enumerate(data_iterator):
             if options.testingIndex >= 0 and sampleIndex != options.testingIndex:
                 if sampleIndex > options.testingIndex:
+                    print("1-break? \n")
                     break
                 continue
             input_pair = []
@@ -672,7 +691,9 @@ def evaluate(options):
                                    'segmentation': gt_segmentation, 'camera': camera, 'plane': planes[0], 'masks': masks, 'mask': gt_masks})
                 continue
 
+            # Set numTestingImages as 2000 for ICL-NUIM dataset
             if sampleIndex >= options.numTestingImages:
+                print("2-break? \n")
                 break
 
             with torch.no_grad():
@@ -697,27 +718,34 @@ def evaluate(options):
                         options, config, input_pair[c], detection_pair[c], statistics=statistics, printInfo=options.debug, evaluate_plane=options.dataset == '')
                     continue
             else:
+                # Here, save the plane params and masks
+                # Replace sampleIndex % 500 to process all the data
                 for c in range(len(detection_pair)):
-                    np.save(options.test_dir + '/' + str(sampleIndex % 500) +
+                    np.save(options.test_dir + '/' + str(sampleIndex) +
                             '_plane_parameters_' + str(c) + '.npy', detection_pair[c]['detection'][:, 6:9])
-                    np.save(options.test_dir + '/' + str(sampleIndex % 500) +
+                    np.save(options.test_dir + '/' + str(sampleIndex) +
                             '_plane_masks_' + str(c) + '.npy', detection_pair[c]['masks'][:, 80:560])
                     continue
                 pass
 
+            # Here, save the image, depth, segmentation images.
+            # Replace sampleIndex % 500 to process all the data
             if sampleIndex < 30 or options.debug or options.dataset != '':
-                visualizeBatchPair(options, config, input_pair, detection_pair, indexOffset=sampleIndex % 500, suffix='_' + name + options.modelType,
+                visualizeBatchPair(options, config, input_pair, detection_pair, indexOffset=sampleIndex, suffix='_' + name + options.modelType,
                                    write_ply=options.testingIndex >= 0, write_new_view=options.testingIndex >= 0 and 'occlusion' in options.suffix)
                 pass
             if sampleIndex >= options.numTestingImages:
+                print("3-break? \n")
                 break
             continue
+
         if 'inference' not in options.dataset:
             options.keyname = name
             printStatisticsDetection(options, statistics)
             all_statistics.append(statistics)
             pass
         continue
+
     if 'inference' not in options.dataset:
         if options.debug and len(detectors) > 1:
             all_statistics = np.concatenate([np.arange(len(all_statistics[0][0])).reshape(
@@ -751,6 +779,7 @@ if __name__ == '__main__':
 
     # Write html for visualization
     if False:
+        print("if False? \n")
         if False:
             info_list = ['image_0', 'segmentation_0',
                          'segmentation_0_warping', 'depth_0', 'depth_0_warping']
@@ -780,4 +809,7 @@ if __name__ == '__main__':
         os.system('rm ' + args.test_dir + '/*')
         pass
 
+    # print(args)
+
+    # args see option.py
     evaluate(args)
