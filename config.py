@@ -14,6 +14,7 @@ import torch
 # Don't use this class directly. Instead, sub-class it and override
 # the configurations you need to change.
 
+
 class Config(object):
     """Base configuration class. For custom configurations, create a
     sub-class that inherits from this one and override properties
@@ -59,7 +60,7 @@ class Config(object):
 
     # The number of input channels
     NUM_INPUT_CHANNELS = 3
-    
+
     # Length of square anchor side in pixels
     RPN_ANCHOR_SCALES = (32, 64, 128, 256, 512)
 
@@ -107,12 +108,12 @@ class Config(object):
 
     # Percent of positive ROIs used to train classifier/mask heads
     if True:
-        ## We used a 16G GPU so that we can set TRAIN_ROIS_PER_IMAGE to be 512
+        # We used a 16G GPU so that we can set TRAIN_ROIS_PER_IMAGE to be 512
         #TRAIN_ROIS_PER_IMAGE = 512
         TRAIN_ROIS_PER_IMAGE = 200
         ROI_POSITIVE_RATIO = 0.33
     else:
-        TRAIN_ROIS_PER_IMAGE = 512    
+        TRAIN_ROIS_PER_IMAGE = 512
         ROI_POSITIVE_RATIO = 0.5
         pass
 
@@ -166,7 +167,7 @@ class Config(object):
     PREDICT_DEPTH = False
 
     NUM_PARAMETER_CHANNELS = 0
-    
+
     def __init__(self, options):
         """Set values of computed attributes."""
         # Effective batch size
@@ -182,14 +183,15 @@ class Config(object):
         self.IMAGE_SHAPE = np.array(
             [self.IMAGE_MAX_DIM, self.IMAGE_MAX_DIM, 3])
 
-
         with torch.no_grad():
-            self.URANGE_UNIT = ((torch.arange(self.IMAGE_MAX_DIM, requires_grad=False).cuda().float() + 0.5) / self.IMAGE_MAX_DIM).view((1, -1)).repeat(self.IMAGE_MIN_DIM, 1)
-            self.VRANGE_UNIT = ((torch.arange(self.IMAGE_MIN_DIM, requires_grad=False).cuda().float() + 0.5) / self.IMAGE_MIN_DIM).view((-1, 1)).repeat(1, self.IMAGE_MAX_DIM)
-            self.ONES = torch.ones(self.URANGE_UNIT.shape, requires_grad=False).cuda()
+            self.URANGE_UNIT = ((torch.arange(self.IMAGE_MAX_DIM, requires_grad=False).cuda(
+            ).float() + 0.5) / self.IMAGE_MAX_DIM).view((1, -1)).repeat(self.IMAGE_MIN_DIM, 1)
+            self.VRANGE_UNIT = ((torch.arange(self.IMAGE_MIN_DIM, requires_grad=False).cuda(
+            ).float() + 0.5) / self.IMAGE_MIN_DIM).view((-1, 1)).repeat(1, self.IMAGE_MAX_DIM)
+            self.ONES = torch.ones(
+                self.URANGE_UNIT.shape, requires_grad=False).cuda()
             pass
-        
-        
+
         # Compute backbone size from input image size
         self.BACKBONE_SHAPES = np.array(
             [[int(math.ceil(self.IMAGE_SHAPE[0] / stride)),
@@ -197,63 +199,77 @@ class Config(object):
              for stride in self.BACKBONE_STRIDES])
 
         self.dataFolder = options.anchorFolder
-        
+
         self.OCCLUSION = 'occlusion' in options.dataset
-        
+
         self.loadAnchorPlanes(options.anchorType)
         self.PREDICT_DEPTH = True
         self.PREDICT_BOUNDARY = False
         self.PREDICT_NORMAL_NP = 'normal_np' in options.suffix
-        
+
         self.BILINEAR_UPSAMPLING = 'bilinear' in options.suffix
         self.FITTING_TYPE = 0
         return
-    
-    def loadAnchorPlanes(self, anchor_type = ''):
-        ## Load cluster centers to serve as the anchors
+
+    def loadAnchorPlanes(self, anchor_type=''):
+        # Load cluster centers to serve as the anchors
         self.ANCHOR_TYPE = anchor_type
         with torch.no_grad():
             if self.ANCHOR_TYPE == 'none':
                 self.NUM_CLASSES = 2
                 self.NUM_PARAMETERS = 3
             elif self.ANCHOR_TYPE == 'joint':
-                self.ANCHOR_PLANES = np.load(self.dataFolder + '/anchor_planes.npy')
+                self.ANCHOR_PLANES = np.load(
+                    self.dataFolder + '/anchor_planes.npy')
                 self.NUM_CLASSES = len(self.ANCHOR_PLANES) + 1
                 self.NUM_PARAMETERS = 4
-                self.ANCHOR_PLANES_TENSOR = torch.from_numpy(self.ANCHOR_PLANES.astype(np.float32)).cuda()
+                self.ANCHOR_PLANES_TENSOR = torch.from_numpy(
+                    self.ANCHOR_PLANES.astype(np.float32)).cuda()
             elif self.ANCHOR_TYPE == 'joint_Nd':
-                self.ANCHOR_PLANES = np.load(self.dataFolder + '/anchor_planes_Nd.npy')            
+                self.ANCHOR_PLANES = np.load(
+                    self.dataFolder + '/anchor_planes_Nd.npy')
                 self.NUM_CLASSES = len(self.ANCHOR_PLANES) + 1
                 self.NUM_PARAMETERS = 4
-                self.ANCHOR_PLANES_TENSOR = torch.from_numpy(self.ANCHOR_PLANES.astype(np.float32)).cuda()            
+                self.ANCHOR_PLANES_TENSOR = torch.from_numpy(
+                    self.ANCHOR_PLANES.astype(np.float32)).cuda()
             elif self.ANCHOR_TYPE == 'Nd':
-                self.ANCHOR_NORMALS = np.load(self.dataFolder + '/anchor_planes_N.npy')
-                self.ANCHOR_OFFSETS = np.squeeze(np.load(self.dataFolder + '/anchor_planes_d.npy'), -1)
-                self.NUM_CLASSES = len(self.ANCHOR_NORMALS) * len(self.ANCHOR_OFFSETS) + 1
+                self.ANCHOR_NORMALS = np.load(
+                    self.dataFolder + '/anchor_planes_N.npy')
+                self.ANCHOR_OFFSETS = np.squeeze(
+                    np.load(self.dataFolder + '/anchor_planes_d.npy'), -1)
+                self.NUM_CLASSES = len(
+                    self.ANCHOR_NORMALS) * len(self.ANCHOR_OFFSETS) + 1
                 self.NUM_PARAMETERS = 4
-                self.ANCHOR_NORMALS_TENSOR = torch.from_numpy(self.ANCHOR_NORMALS.astype(np.float32)).cuda()
-                self.ANCHOR_OFFSETS_TENSOR = torch.from_numpy(self.ANCHOR_OFFSETS.astype(np.float32)).cuda()
+                self.ANCHOR_NORMALS_TENSOR = torch.from_numpy(
+                    self.ANCHOR_NORMALS.astype(np.float32)).cuda()
+                self.ANCHOR_OFFSETS_TENSOR = torch.from_numpy(
+                    self.ANCHOR_OFFSETS.astype(np.float32)).cuda()
             elif 'normal' in self.ANCHOR_TYPE:
                 if self.ANCHOR_TYPE == 'normal':
-                    self.ANCHOR_NORMALS = np.load(self.dataFolder + '/anchor_planes_N.npy')
+                    self.ANCHOR_NORMALS = np.load(
+                        self.dataFolder + '/anchor_planes_N.npy')
                 else:
                     k = int(self.ANCHOR_TYPE[6:])
                     if k == 0:
                         self.ANCHOR_NORMALS = np.zeros((1, 3))
                     else:
-                        self.ANCHOR_NORMALS = np.load(self.dataFolder + '/anchor_planes_N_' + str(k) + '.npy')
+                        self.ANCHOR_NORMALS = np.load(
+                            self.dataFolder + '/anchor_planes_N_' + str(k) + '.npy')
                         pass
                     pass
                 self.NUM_CLASSES = len(self.ANCHOR_NORMALS) + 1
                 self.NUM_PARAMETERS = 3
-                self.ANCHOR_NORMALS_TENSOR = torch.from_numpy(self.ANCHOR_NORMALS.astype(np.float32)).cuda()                
+                self.ANCHOR_NORMALS_TENSOR = torch.from_numpy(
+                    self.ANCHOR_NORMALS.astype(np.float32)).cuda()
                 if self.OCCLUSION:
                     self.NUM_PARAMETER_CHANNELS = 1
                     pass
             elif self.ANCHOR_TYPE in ['patch', 'patch_Nd']:
-                self.ANCHOR_NORMALS = np.load(self.dataFolder + '/anchor_planes_N.npy')
+                self.ANCHOR_NORMALS = np.load(
+                    self.dataFolder + '/anchor_planes_N.npy')
                 self.NUM_CLASSES = len(self.ANCHOR_NORMALS) + 1
-                self.ANCHOR_NORMALS_TENSOR = torch.from_numpy(self.ANCHOR_NORMALS.astype(np.float32)).cuda()
+                self.ANCHOR_NORMALS_TENSOR = torch.from_numpy(
+                    self.ANCHOR_NORMALS.astype(np.float32)).cuda()
                 if self.ANCHOR_TYPE == 'patch':
                     self.NUM_PARAMETER_CHANNELS = 1
                 elif self.ANCHOR_TYPE == 'patch_Nd':
@@ -261,7 +277,8 @@ class Config(object):
                     pass
                 self.ANCHOR_TYPE = 'normal'
             elif self.ANCHOR_TYPE == 'layout':
-                self.ANCHOR_PLANES = np.load(self.dataFolder + '/anchor_planes_layout.npy')
+                self.ANCHOR_PLANES = np.load(
+                    self.dataFolder + '/anchor_planes_layout.npy')
                 self.NUM_CLASSES = len(self.ANCHOR_PLANES) + 1
                 self.NUM_PARAMETERS = 9
                 self.ANCHOR_INFO = []
@@ -272,17 +289,21 @@ class Config(object):
                         elif layout_type == 1:
                             self.ANCHOR_INFO.append((2, 'convex', layout_type))
                         elif layout_type == 2:
-                            self.ANCHOR_INFO.append((2, 'concave', layout_type))
+                            self.ANCHOR_INFO.append(
+                                (2, 'concave', layout_type))
                         elif layout_type == 3:
                             self.ANCHOR_INFO.append((3, 'convex', layout_type))
                         elif layout_type == 4:
-                            self.ANCHOR_INFO.append((3, 'concave', layout_type))
+                            self.ANCHOR_INFO.append(
+                                (3, 'concave', layout_type))
                             pass
                         continue
                     continue
-                self.ANCHOR_PLANES_TENSOR = torch.from_numpy(self.ANCHOR_PLANES.astype(np.float32)).cuda()            
+                self.ANCHOR_PLANES_TENSOR = torch.from_numpy(
+                    self.ANCHOR_PLANES.astype(np.float32)).cuda()
             elif self.ANCHOR_TYPE == 'structure':
-                self.ANCHOR_PLANES = np.load(self.dataFolder + '/anchor_planes_structure.npy')
+                self.ANCHOR_PLANES = np.load(
+                    self.dataFolder + '/anchor_planes_structure.npy')
                 self.NUM_CLASSES = len(self.ANCHOR_PLANES) + 1
                 num_anchor_planes = [10, 5, 5, 3, 3]
                 self.ANCHOR_INFO = []
@@ -294,18 +315,22 @@ class Config(object):
                         elif layout_type == 1:
                             self.ANCHOR_INFO.append((2, 'convex', layout_type))
                         elif layout_type == 2:
-                            self.ANCHOR_INFO.append((2, 'concave', layout_type))
+                            self.ANCHOR_INFO.append(
+                                (2, 'concave', layout_type))
                         elif layout_type == 3:
                             self.ANCHOR_INFO.append((3, 'convex', layout_type))
                         elif layout_type == 4:
-                            self.ANCHOR_INFO.append((3, 'concave', layout_type))
+                            self.ANCHOR_INFO.append(
+                                (3, 'concave', layout_type))
                             pass
                         continue
 
-                    self.TYPE_ANCHOR_OFFSETS.append(self.TYPE_ANCHOR_OFFSETS[-1] + num)
+                    self.TYPE_ANCHOR_OFFSETS.append(
+                        self.TYPE_ANCHOR_OFFSETS[-1] + num)
                     continue
                 self.NUM_PARAMETERS = 9
-                self.ANCHOR_PLANES_TENSOR = torch.from_numpy(self.ANCHOR_PLANES.astype(np.float32)).cuda()
+                self.ANCHOR_PLANES_TENSOR = torch.from_numpy(
+                    self.ANCHOR_PLANES.astype(np.float32)).cuda()
             else:
                 assert(False)
                 pass
@@ -317,9 +342,12 @@ class Config(object):
             anchors = self.ANCHOR_PLANES_TENSOR[class_ids.data - 1]
             parameters = parameters[:, :3] + anchors
         elif self.ANCHOR_TYPE == 'Nd':
-            normals = self.ANCHOR_NORMALS_TENSOR[(class_ids.data - 1) % self.ANCHOR_OFFSETS_TENSOR]
-            offsets = self.ANCHOR_OFFSETS_TENSOR[(class_ids.data - 1) // self.ANCHOR_OFFSETS_TENSOR]
-            parameters = (parameters[:, :3] + normals) * (parameters[:, 3] + offsets)
+            normals = self.ANCHOR_NORMALS_TENSOR[(
+                class_ids.data - 1) % self.ANCHOR_OFFSETS_TENSOR]
+            offsets = self.ANCHOR_OFFSETS_TENSOR[(
+                class_ids.data - 1) // self.ANCHOR_OFFSETS_TENSOR]
+            parameters = (parameters[:, :3] + normals) * \
+                (parameters[:, 3] + offsets)
         elif self.ANCHOR_TYPE == 'layout':
             anchors = self.ANCHOR_PLANES_TENSOR[class_ids.data - 1]
             parameters = parameters[:, :3] + anchors
@@ -328,7 +356,7 @@ class Config(object):
             parameters = parameters[:, :3] + normals
             pass
         return parameters
-    
+
     def display(self):
         """Display Configuration values."""
         print("\nConfigurations:")
@@ -339,11 +367,13 @@ class Config(object):
         return
 
     def getRanges(self, metadata):
-        urange = (self.URANGE_UNIT * self.METADATA[4] - self.METADATA[2]) / self.METADATA[0]
-        vrange = (self.VRANGE_UNIT * self.METADATA[5] - self.METADATA[3]) / self.METADATA[1]
+        urange = (self.URANGE_UNIT *
+                  self.METADATA[4] - self.METADATA[2]) / self.METADATA[0]
+        vrange = (self.VRANGE_UNIT *
+                  self.METADATA[5] - self.METADATA[3]) / self.METADATA[1]
         ranges = torch.stack([urange, self.ONES, -vrange], dim=-1)
         return ranges
-        
+
 
 class PlaneConfig(Config):
     """Configuration for training on ScanNet.
