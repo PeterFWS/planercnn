@@ -30,7 +30,7 @@ dependencies:
   - harfbuzz=2.4.0=h9f30f68_3
   - hdf5=1.10.4=hb1b8bf9_0
   - icu=64.2=he1b5a44_1
-  - intel-openmp=2020.1=217
+  - intel-openmp=2019.4=243
   - jpeg=9c=h14c3975_1001
   - krb5=1.17.1=h173b8e3_0
   - ld_impl_linux-64=2.33.1=h53a641e_7
@@ -75,6 +75,7 @@ dependencies:
   - tbb=2020.0=hfd86e86_0
   - tbb4py=2020.0=py37hfd86e86_0
   - tk=8.6.10=hed695b0_0
+  - tqdm=4.46.1=pyh9f0ad1d_0
   - unzip=6.0=h611a1e1_0
   - vim=8.2.0746=py37he9c8336_0
   - wheel=0.34.2=py37_0
@@ -109,6 +110,5 @@ dependencies:
     - scikit-image==0.14.1
     - scipy==1.4.1
     - toolz==0.10.0
-    - tqdm==4.28.1
 prefix: /root/anaconda3/envs/planercnn
 
